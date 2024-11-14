@@ -1,0 +1,40 @@
+version: '3.8' # Use the latest version available
+
+services:
+  gitlab:
+    container_name: my_gitlab
+    image: gitlab/gitlab-ce:latest # Specify a version for consistency
+    #    restart: always # Ensures GitLab restarts automatically if stopped
+    ports:
+      - '80:80'      # HTTP
+      - '443:443'    # HTTPS
+      - '2222:22'    # SSH for Git over SSH
+    volumes:
+      - './Gitlab_Data/configs:/etc/gitlab'     # GitLab configuration
+      - './Gitlab_Data/data:/var/opt/gitlab'    #
+      - './Gitlab_Data/logs:/var/log/gitlab'
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        external_url "http://change-url"
+        gitlab_rails['initial_root_password'] = "your_password" # Initial root password
+    networks:
+      git-net:
+        ipv4_address: 10.10.10.2
+  gitlab-runner:
+    container_name: gitlab-runner
+    image: gitlab/gitlab-runner:latest
+    depends_on:
+      - gitlab
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - './Gitlab_Data/runner:/etc/gitlab-runner'
+    networks:
+      git-net:
+        ipv4_address: 10.10.10.3
+networks:
+  git-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.10.10.0/24
+          gateway: 10.10.10.1
