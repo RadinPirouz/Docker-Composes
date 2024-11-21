@@ -16,6 +16,7 @@ services:
     environment:
       GITLAB_OMNIBUS_CONFIG: |
         external_url "http://change-url"
+        gitlab_rails['gitlab_shell_ssh_port'] = "2222" # Gitlab SSH Port
         gitlab_rails['initial_root_password'] = "your_password" # Initial root password
     networks:
       git-net:
